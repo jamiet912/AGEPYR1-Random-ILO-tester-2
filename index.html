@@ -6377,19 +6377,22 @@
     let availableILOs = [];
     
     // Update availableILOs based on filter checkboxes
-    function updateAvailableILOs() {
-      const checkedTypes = Array.from(document.querySelectorAll('.typeFilter'))
-        .filter(cb => cb.checked)
-        .map(cb => cb.value);
-      availableILOs = ilos.filter(item => checkedTypes.includes(item.Type));
-    }
-    
-    updateAvailableILOs();
-    
-    // Add event listeners to filter checkboxes
-    document.querySelectorAll('.typeFilter').forEach(cb => {
-      cb.addEventListener('change', updateAvailableILOs);
-    });
+function updateAvailableILOs() {
+  const checkedTypes = Array.from(document.querySelectorAll('.typeFilter'))
+    .filter(cb => cb.checked)
+    .map(cb => cb.value);
+
+  availableILOs = ilos.filter(item => 
+    checkedTypes.includes(item.Type) || (checkedTypes.includes("Other") && !["Lecture", "Lab/Practical", "CBL"].includes(item.Type))
+  );
+}
+
+updateAvailableILOs();
+
+// Add event listeners to filter checkboxes
+document.querySelectorAll('.typeFilter').forEach(cb => {
+  cb.addEventListener('change', updateAvailableILOs);
+});
     
     const spinButton = document.getElementById('spinButton');
     const iloDisplay = document.getElementById('iloDisplay');
