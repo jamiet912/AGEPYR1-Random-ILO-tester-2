@@ -6372,89 +6372,84 @@
    }
     ];
 
-    
     // Global array for non-repeating mode – will be updated based on filters
-    let availableILOs = [];
-    
-    // Update availableILOs based on filter checkboxes
+let availableILOs = [];
+
+// Update availableILOs based on filter checkboxes
 function updateAvailableILOs() {
   const checkedTypes = Array.from(document.querySelectorAll('.typeFilter'))
     .filter(cb => cb.checked)
     .map(cb => cb.value);
 
+  // Filter ILOs based on checked checkboxes
   availableILOs = ilos.filter(item => 
-    checkedTypes.includes(item.Type) || (checkedTypes.includes("Other") && !["Lecture", "Lab/Practical", "CBL"].includes(item.Type))
+    checkedTypes.includes(item.Type) || 
+    (checkedTypes.includes("Other") && !["Lecture", "Lab/Practical", "CBL"].includes(item.Type))
   );
+
+  console.log("Updated available ILOs:", availableILOs); // Debugging log
 }
 
+// Initialize available ILOs on page load
 updateAvailableILOs();
 
 // Add event listeners to filter checkboxes
 document.querySelectorAll('.typeFilter').forEach(cb => {
   cb.addEventListener('change', updateAvailableILOs);
 });
-    
-    const spinButton = document.getElementById('spinButton');
-    const iloDisplay = document.getElementById('iloDisplay');
-    const removeCheckbox = document.getElementById('removeShown');
-    const spinSound = document.getElementById('spinSound');
-    let spinInterval;
-    
-    function spinILOs() {
-      spinSound.currentTime = 0;
-      spinSound.play();
-      spinButton.disabled = true;
-      
-      // Use filtered data based on checkbox state
-      let currentList = removeCheckbox.checked ? [...availableILOs] : [...ilos].filter(item => {
-        const checkedTypes = Array.from(document.querySelectorAll('.typeFilter'))
-          .filter(cb => cb.checked)
-          .map(cb => cb.value);
-        return checkedTypes.includes(item.Type);
-      });
-      
-      if (currentList.length === 0) {
-        iloDisplay.textContent = "No ILOs available for the selected filters!";
-        spinButton.disabled = false;
-        return;
-      }
-      
-      spinInterval = setInterval(() => {
-        let randomIndex = Math.floor(Math.random() * currentList.length);
-        let currentILO = currentList[randomIndex];
-        iloDisplay.innerHTML = "<strong>Session:</strong> " + currentILO.SessionTitle + "<br>" +
-                                "<strong>Type:</strong> " + currentILO.Type + "<br>" +
-                                "<strong>Topic:</strong> " + currentILO.Topic + "<br>" +
-                                "<strong>ILO:</strong> " + currentILO.ILO;
-      }, 50);
-      
-      setTimeout(() => {
-        clearInterval(spinInterval);
-        // Refresh current list based on filters
-        currentList = removeCheckbox.checked ? [...availableILOs] : [...ilos].filter(item => {
-          const checkedTypes = Array.from(document.querySelectorAll('.typeFilter'))
-            .filter(cb => cb.checked)
-            .map(cb => cb.value);
-          return checkedTypes.includes(item.Type);
-        });
-        if (currentList.length === 0) {
-          iloDisplay.textContent = "No ILOs available for the selected filters!";
-        } else {
-          let randomIndex = Math.floor(Math.random() * currentList.length);
-          let finalILO = currentList[randomIndex];
-          iloDisplay.innerHTML = "<strong>Session:</strong> " + finalILO.SessionTitle + "<br>" +
-                                 "<strong>Type:</strong> " + finalILO.Type + "<br>" +
-                                 "<strong>Topic:</strong> " + finalILO.Topic + "<br>" +
-                                 "<strong>ILO:</strong> " + finalILO.ILO;
-          if (removeCheckbox.checked) {
-            availableILOs = availableILOs.filter(item => item !== finalILO);
-          }
-        }
-        spinButton.disabled = false;
-      }, 2000);
+
+// Button and UI elements
+const spinButton = document.getElementById('spinButton');
+const iloDisplay = document.getElementById('iloDisplay');
+const removeCheckbox = document.getElementById('removeShown');
+const spinSound = document.getElementById('spinSound');
+let spinInterval;
+
+function spinILOs() {
+  spinSound.currentTime = 0;
+  spinSound.play();
+  spinButton.disabled = true;
+
+  // Ensure correct list is used based on removeCheckbox state
+  let currentList = removeCheckbox.checked ? [...availableILOs] : ilos.filter(item => 
+    availableILOs.includes(item) // Use already filtered list
+  );
+
+  if (currentList.length === 0) {
+    iloDisplay.textContent = "No ILOs available for the selected filters!";
+    spinButton.disabled = false;
+    return;
+  }
+
+  spinInterval = setInterval(() => {
+    let randomIndex = Math.floor(Math.random() * currentList.length);
+    let currentILO = currentList[randomIndex];
+    iloDisplay.innerHTML = `<strong>Session:</strong> ${currentILO.SessionTitle}<br>
+                            <strong>Type:</strong> ${currentILO.Type}<br>
+                            <strong>Topic:</strong> ${currentILO.Topic}<br>
+                            <strong>ILO:</strong> ${currentILO.ILO}`;
+  }, 50);
+
+  setTimeout(() => {
+    clearInterval(spinInterval);
+
+    let finalIndex = Math.floor(Math.random() * currentList.length);
+    let finalILO = currentList[finalIndex];
+
+    iloDisplay.innerHTML = `<strong>Session:</strong> ${finalILO.SessionTitle}<br>
+                            <strong>Type:</strong> ${finalILO.Type}<br>
+                            <strong>Topic:</strong> ${finalILO.Topic}<br>
+                            <strong>ILO:</strong> ${finalILO.ILO}`;
+
+    // If "Remove Shown ILOs" is checked, remove the displayed ILO from availableILOs
+    if (removeCheckbox.checked) {
+      availableILOs = availableILOs.filter(item => item !== finalILO);
     }
-    
-    spinButton.addEventListener('click', spinILOs);
-  </script>
-</body>
-</html>
+
+    spinButton.disabled = false;
+  }, 2000);
+}
+
+// Event listener for the spin button
+spinButton.addEventListener('click', spinILOs);
+
